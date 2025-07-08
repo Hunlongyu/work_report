@@ -3,8 +3,10 @@ import os.path
 import qtmodern6.styles
 import qt_themes
 
-from src.views.ui_home import Ui_Home
-from PySide6.QtWidgets import QWidget, QApplication, QAbstractItemView, QTreeWidgetItem, QFileDialog, QMessageBox, QMenu
+from src.components.add_account_dialog import AddAccountDialog
+from src.views.home.ui_home import Ui_Home
+from PySide6.QtWidgets import QWidget, QApplication, QAbstractItemView, QTreeWidgetItem, QFileDialog, QMessageBox, \
+    QMenu, QDialog
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QAction
 from git import Repo, InvalidGitRepositoryError
@@ -26,6 +28,7 @@ class Home(QWidget):
         self.ui.btn_export.hide()
         self.init_theme()
         self.init_project_wgt()
+        self.init_account_wgt()
 
     def init_connect(self):
         self.ui.btn_settings.clicked.connect(self.ui.wgt_right_content.show)
@@ -292,5 +295,58 @@ class Home(QWidget):
     def export_report(self):
         pass
 
+    def init_account_wgt(self):
+        self.ui.twgt_account.setColumnCount(2)
+        self.ui.twgt_account.setRootIsDecorated(False)
+        self.ui.twgt_account.setHeaderLabels(["账号", "邮箱"])
+        self.ui.twgt_account.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.ui.twgt_account.customContextMenuRequested.connect(self.show_account_context_menu)
+        self.load_accounts()
+
+    def show_account_context_menu(self, pos):
+        item = self.ui.twgt_account.itemAt(pos)
+        if not item:
+            return
+
+        menu = QMenu(self)
+        delete_action = QAction("删除账号", self)
+        delete_action.triggered.connect(lambda: self.remove_account(item))
+        menu.addAction(delete_action)
+        menu.exec_(self.ui.twgt_account.viewport().mapToGlobal(pos))
+
+    def remove_account(self, item: QTreeWidgetItem):
+        account = item.text(0)
+        reply = QMessageBox.question(
+            self, "确认删除",
+            f"是否删除账号 [{account}]？",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+        if reply != QMessageBox.StandardButton.Yes:
+            return
+
+        # 删除配置
+        with Config().group("accounts"):
+            Config().remove(account)
+
+        # 删除 UI
+        index = self.ui.twgt_account.indexOfTopLevelItem(item)
+        self.ui.twgt_account.takeTopLevelItem(index)
+
     def add_account(self):
-        pass
+        dialog = AddAccountDialog(self)
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            name, email = dialog.get_account_info()
+
+            item = QTreeWidgetItem([name, email])
+            self.ui.twgt_account.addTopLevelItem(item)
+
+            with Config().group("accounts"):
+                Config().set(name, email)
+
+    def load_accounts(self):
+        self.ui.twgt_account.clear()
+        with Config().group("accounts"):
+            for account in Config().child_keys():
+                email = Config().get(account)
+                item = QTreeWidgetItem([account, email])
+                self.ui.twgt_account.addTopLevelItem(item)

@@ -3,7 +3,7 @@ import qtmodern6.windows
 import qtmodern6.styles
 
 from PySide6 import QtWidgets
-from src.views.home import Home
+from src.views.home.home import Home
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication()

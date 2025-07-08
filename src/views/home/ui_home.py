@@ -17,9 +17,9 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QAbstractSpinBox, QApplication, QComboBox, QDateEdit,
     QFrame, QGridLayout, QHBoxLayout, QHeaderView,
-    QLabel, QListWidget, QListWidgetItem, QPlainTextEdit,
-    QPushButton, QSizePolicy, QSpacerItem, QToolButton,
-    QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget)
+    QLabel, QPlainTextEdit, QPushButton, QSizePolicy,
+    QSpacerItem, QToolButton, QTreeWidget, QTreeWidgetItem,
+    QVBoxLayout, QWidget)
 
 class Ui_Home(object):
     def setupUi(self, Home):
@@ -87,10 +87,13 @@ class Ui_Home(object):
 
         self.gridLayout_7.addItem(self.horizontalSpacer_5, 0, 1, 1, 1)
 
-        self.lwgt_account = QListWidget(self.wgt_account)
-        self.lwgt_account.setObjectName(u"lwgt_account")
+        self.twgt_account = QTreeWidget(self.wgt_account)
+        __qtreewidgetitem1 = QTreeWidgetItem()
+        __qtreewidgetitem1.setText(0, u"1");
+        self.twgt_account.setHeaderItem(__qtreewidgetitem1)
+        self.twgt_account.setObjectName(u"twgt_account")
 
-        self.gridLayout_7.addWidget(self.lwgt_account, 1, 0, 1, 3)
+        self.gridLayout_7.addWidget(self.twgt_account, 1, 0, 1, 3)
 
 
         self.vbl_left.addWidget(self.wgt_account)
