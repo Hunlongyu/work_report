@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Home</class>
+ <widget class="QWidget" name="Home">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1163</width>
+    <height>691</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_3">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <property name="spacing">
+    <number>0</number>
+   </property>
+   <item row="1" column="0">
+    <layout class="QHBoxLayout" name="hbl_body" stretch="3,4,4">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <item>
+      <layout class="QVBoxLayout" name="vbl_left" stretch="4,2">
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QWidget" name="wgt_project" native="true">
+         <property name="maximumSize">
+          <size>
+           <width>320</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_2">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>项目</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <spacer name="horizontalSpacer_4">
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>250</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="1" column="0" colspan="3">
+           <widget class="QTreeWidget" name="twgt_project">
+            <column>
+             <property name="text">
+              <string notr="true">1</string>
+             </property>
+            </column>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QToolButton" name="btn_project_add">
+            <property name="text">
+             <string>+</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QWidget" name="wgt_account" native="true">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>320</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_7">
+          <item row="0" column="2">
+           <widget class="QToolButton" name="btn_account_add">
+            <property name="text">
+             <string>+</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>账号</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <spacer name="horizontalSpacer_5">
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>250</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="1" column="0" colspan="3">
+           <widget class="QListWidget" name="lwgt_account"/>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="vbl_mid" stretch="9">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QWidget" name="wgt_mid_content" native="true">
+         <layout class="QGridLayout" name="gridLayout_5">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <item row="0" column="0">
+           <widget class="QPlainTextEdit" name="pte_commit_log"/>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="vbl_right" stretch="0">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QWidget" name="wgt_right_content" native="true">
+         <layout class="QGridLayout" name="gridLayout_6">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <item row="0" column="0">
+           <widget class="QPlainTextEdit" name="pte_ai_repot"/>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+   <item row="0" column="0">
+    <widget class="QWidget" name="wgt_header" native="true">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="1">
+       <widget class="Line" name="line_4">
+        <property name="orientation">
+         <enum>Qt::Orientation::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="16">
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Orientation::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>187</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="0" column="17">
+       <widget class="QPushButton" name="btn_export">
+        <property name="text">
+         <string>导出</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="9">
+       <widget class="QDateEdit" name="de_until">
+        <property name="buttonSymbols">
+         <enum>QAbstractSpinBox::ButtonSymbols::NoButtons</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="15">
+       <widget class="QPushButton" name="btn_ai_repot">
+        <property name="text">
+         <string>AI 总结</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QToolButton" name="btn_settings">
+        <property name="layoutDirection">
+         <enum>Qt::LayoutDirection::LeftToRight</enum>
+        </property>
+        <property name="text">
+         <string>设置</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="10">
+       <widget class="QComboBox" name="cbb_date"/>
+      </item>
+      <item row="0" column="6">
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Orientation::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QPushButton" name="btn_statistics">
+        <property name="text">
+         <string>数据统计</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="Line" name="line_2">
+        <property name="orientation">
+         <enum>Qt::Orientation::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="5">
+       <widget class="QComboBox" name="cbb_theme"/>
+      </item>
+      <item row="0" column="14">
+       <widget class="Line" name="line_3">
+        <property name="orientation">
+         <enum>Qt::Orientation::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="8">
+       <widget class="QDateEdit" name="de_since">
+        <property name="buttonSymbols">
+         <enum>QAbstractSpinBox::ButtonSymbols::NoButtons</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="11">
+       <widget class="QPushButton" name="btn_get">
+        <property name="text">
+         <string>获取</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="4">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>主题皮肤: </string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="7">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>数据信息: </string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
