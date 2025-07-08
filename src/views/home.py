@@ -3,7 +3,7 @@ import os.path
 import qtmodern6.styles
 import qt_themes
 
-from .ui_home import Ui_Home
+from src.views.ui_home import Ui_Home
 from PySide6.QtWidgets import QWidget, QApplication, QAbstractItemView, QTreeWidgetItem, QFileDialog, QMessageBox, QMenu
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QAction
@@ -96,7 +96,7 @@ class Home(QWidget):
             Config().set(project_name, json.dumps(project_data))
 
     @staticmethod
-    def on_project_item_changed(item: QTreeWidgetItem, column: int):
+    def on_project_item_changed(item: QTreeWidgetItem):
         parent = item.parent()
         if parent is None:
             return  # 项目节点本身不处理勾选变化
@@ -291,7 +291,6 @@ class Home(QWidget):
 
     def export_report(self):
         pass
-
 
     def add_account(self):
         pass
