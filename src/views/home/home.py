@@ -1,10 +1,13 @@
 import json
 import os.path
+import subprocess
+
 import qtmodern6.styles
 import qt_themes
 import pendulum
 
 from src.components.add_account_dialog import AddAccountDialog
+from src.utils.git_log_worker import GitLogManager
 from src.views.home.ui_home import Ui_Home
 from PySide6.QtWidgets import QWidget, QApplication, QAbstractItemView, QTreeWidgetItem, QFileDialog, QMessageBox, \
     QMenu, QDialog
@@ -17,17 +20,19 @@ from src.config.config import Config
 class Home(QWidget):
     def __init__(self):
         super(Home, self).__init__()
+        pendulum.set_locale('zh')
+        self.git_log_manager = None
         self.ui = Ui_Home()
         self.ui.setupUi(self)
         self.init_ui()
         self.init_connect()
+        self.grouped_logs = {}
 
     def init_ui(self):
         self.setWindowTitle('工作总结报告')
         self.ui.hbl_body.setStretch(2, 0)
         self.ui.wgt_right_content.hide()
         self.ui.btn_export.hide()
-        pendulum.set_locale('zh')
         self.init_theme()
         self.init_project_wgt()
         self.init_account_wgt()
@@ -208,6 +213,7 @@ class Home(QWidget):
                         continue
 
                     project_item = self.add_project_to_tree(project_name)
+                    project_item.setData(0, Qt.ItemDataRole.UserRole, folder_path)
                     self._add_branch_items(project_item, Repo(folder_path), checked)
 
                     project_item.setExpanded(project_data.get("expanded", True))
@@ -286,6 +292,84 @@ class Home(QWidget):
         except Exception as e:
             QMessageBox.critical(self, "错误", str(e))
 
+    def init_account_wgt(self):
+        self.ui.twgt_account.setColumnCount(2)
+        self.ui.twgt_account.setRootIsDecorated(False)
+        self.ui.twgt_account.setHeaderLabels(["用户名", "邮箱"])
+        self.ui.twgt_account.itemChanged.connect(self.on_account_item_changed)
+        self.ui.twgt_account.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.ui.twgt_account.customContextMenuRequested.connect(self.show_account_context_menu)
+        self.load_accounts()
+
+    def show_account_context_menu(self, pos):
+        item = self.ui.twgt_account.itemAt(pos)
+        if not item:
+            return
+
+        menu = QMenu(self)
+        delete_action = QAction("删除账号", self)
+        delete_action.triggered.connect(lambda: self.remove_account(item))
+        menu.addAction(delete_action)
+        menu.exec_(self.ui.twgt_account.viewport().mapToGlobal(pos))
+
+    def remove_account(self, item: QTreeWidgetItem):
+        account = item.text(0)
+        reply = QMessageBox.question(
+            self, "确认删除",
+            f"是否删除账号 [{account}]？",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+        if reply != QMessageBox.StandardButton.Yes:
+            return
+
+        # 删除配置
+        with Config().group("accounts"):
+            Config().remove(account)
+
+        # 删除 UI
+        index = self.ui.twgt_account.indexOfTopLevelItem(item)
+        self.ui.twgt_account.takeTopLevelItem(index)
+
+    def add_account(self):
+        dialog = AddAccountDialog(self)
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            name, email = dialog.get_account_info()
+
+            item = QTreeWidgetItem([name, email])
+            item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
+            item.setCheckState(0, Qt.CheckState.Checked)
+            self.ui.twgt_account.addTopLevelItem(item)
+
+            with Config().group("accounts"):
+                Config().set(name, json.dumps({
+                    "email": email,
+                    "checked": True
+                }, ensure_ascii=False))
+
+    def load_accounts(self):
+        self.ui.twgt_account.clear()
+        with Config().group("accounts"):
+            for account in Config().child_keys():
+                value = Config().get(account)
+                data = json.loads(value)
+                email = data.get("email", "")
+                checked = data.get("checked", True)
+                item = QTreeWidgetItem([account, email])
+                item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
+                item.setCheckState(0, Qt.CheckState.Checked if checked else Qt.CheckState.Unchecked)
+                self.ui.twgt_account.addTopLevelItem(item)
+
+    @staticmethod
+    def on_account_item_changed(item: QTreeWidgetItem, column: int):
+        account = item.text(0)
+        email = item.text(1)
+        checked = item.checkState(0) == Qt.CheckState.Checked
+        with Config().group("accounts"):
+            Config().set(account, json.dumps({
+                "email": email,
+                "checked": checked
+            }, ensure_ascii=False))
+
     def init_date(self):
         date_options = [
             '今日', '昨日', '本周', '上周',
@@ -349,67 +433,105 @@ class Home(QWidget):
         self.ui.de_since.setDate(start)
         self.ui.de_until.setDate(end)
 
+    def get_commit_info_account(self):
+        selected_author = set()
+        twgt = self.ui.twgt_account
+        for i in range(twgt.topLevelItemCount()):
+            item = twgt.topLevelItem(i)
+            if item.checkState(0) == Qt.CheckState.Checked:
+                account = item.text(0).strip()
+                if account:
+                    selected_author.add(account)
+        return selected_author
+
+    def get_commit_info_project_branch(self):
+        project_map = {}
+        tree = self.ui.twgt_project
+        for i in range(tree.topLevelItemCount()):
+            project_item = tree.topLevelItem(i)
+            project_name = project_item.text(0).strip()
+            repo_path = project_item.data(0, Qt.ItemDataRole.UserRole)
+            if not repo_path or not os.path.exists(repo_path):
+                continue
+
+            branches = []
+            for j in range(project_item.childCount()):
+                branch_item = project_item.child(j)
+                if branch_item.checkState(0) == Qt.CheckState.Checked:
+                    branch_name = branch_item.text(0).strip()
+                    if branch_name:
+                        branches.append(branch_name)
+            if branches:
+                project_map[project_name] = {
+                    "path": repo_path,
+                    "branches": branches
+                }
+        return project_map
+
     def get_commit_info(self):
-        pass
+        selected_authors = self.get_commit_info_account()
+        if not selected_authors:
+            QMessageBox.warning(
+                self,
+                "错误",
+                "请选择账号！"
+            )
+            return
+
+        project_map = self.get_commit_info_project_branch()
+        if not project_map:
+            QMessageBox.warning(
+                self,
+                "错误",
+                "请选择项目和分支！"
+            )
+            return
+
+        since, until = self.get_date_range(self.ui.cbb_date.currentText())
+        self.git_log_manager = GitLogManager(max_threads=4)
+        self.git_log_manager.log_collected.connect(self.on_log_collected)
+        self.git_log_manager.error.connect(self.on_log_error)
+        self.git_log_manager.progress.connect(self.on_progress)
+        self.git_log_manager.finished.connect(self.on_all_finished)
+        self.git_log_manager.start(project_map, selected_authors, since, until)
+
+    def on_log_collected(self, project, branch, author, logs):
+        key = (project, branch, author)
+        if key not in self.grouped_logs:
+            self.grouped_logs[key] = []
+        self.grouped_logs[key].extend(logs)
+
+    def on_log_error(self, message):
+        QMessageBox.warning(
+            self,
+            "错误",
+            message
+        )
+
+    def on_progress(self, done, total):
+        percentage = done / total * 100
+        self.ui.progress.setValue(percentage)
+
+    def on_all_finished(self):
+        self.ui.pte_commit_log.clear()
+        unique_commits = set()
+        # 遍历每个项目分支账号组，先写标题，再写去重后的日志
+        for (project, branch, author), logs in self.grouped_logs.items():
+            self.ui.pte_commit_log.appendPlainText(f"【项目】{project}\n【分支】{branch}\n【账号】{author}")
+
+            # 当前组去重
+            deduped_logs = []
+            for log in logs:
+                if log["commit"] not in unique_commits:
+                    unique_commits.add(log["commit"])
+                    deduped_logs.append(log)
+
+            for log in deduped_logs:
+                self.ui.pte_commit_log.appendPlainText(f"{log['date']} {log['message']}")
+            self.ui.pte_commit_log.appendPlainText("")
 
     def ai_report(self):
         pass
 
     def export_report(self):
         pass
-
-    def init_account_wgt(self):
-        self.ui.twgt_account.setColumnCount(2)
-        self.ui.twgt_account.setRootIsDecorated(False)
-        self.ui.twgt_account.setHeaderLabels(["账号", "邮箱"])
-        self.ui.twgt_account.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-        self.ui.twgt_account.customContextMenuRequested.connect(self.show_account_context_menu)
-        self.load_accounts()
-
-    def show_account_context_menu(self, pos):
-        item = self.ui.twgt_account.itemAt(pos)
-        if not item:
-            return
-
-        menu = QMenu(self)
-        delete_action = QAction("删除账号", self)
-        delete_action.triggered.connect(lambda: self.remove_account(item))
-        menu.addAction(delete_action)
-        menu.exec_(self.ui.twgt_account.viewport().mapToGlobal(pos))
-
-    def remove_account(self, item: QTreeWidgetItem):
-        account = item.text(0)
-        reply = QMessageBox.question(
-            self, "确认删除",
-            f"是否删除账号 [{account}]？",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-        )
-        if reply != QMessageBox.StandardButton.Yes:
-            return
-
-        # 删除配置
-        with Config().group("accounts"):
-            Config().remove(account)
-
-        # 删除 UI
-        index = self.ui.twgt_account.indexOfTopLevelItem(item)
-        self.ui.twgt_account.takeTopLevelItem(index)
-
-    def add_account(self):
-        dialog = AddAccountDialog(self)
-        if dialog.exec() == QDialog.DialogCode.Accepted:
-            name, email = dialog.get_account_info()
-
-            item = QTreeWidgetItem([name, email])
-            self.ui.twgt_account.addTopLevelItem(item)
-
-            with Config().group("accounts"):
-                Config().set(name, email)
-
-    def load_accounts(self):
-        self.ui.twgt_account.clear()
-        with Config().group("accounts"):
-            for account in Config().child_keys():
-                email = Config().get(account)
-                item = QTreeWidgetItem([account, email])
-                self.ui.twgt_account.addTopLevelItem(item)

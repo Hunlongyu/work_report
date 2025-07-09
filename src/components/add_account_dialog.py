@@ -10,8 +10,8 @@ class AddAccountDialog(QDialog):
         layout = QVBoxLayout(self)
 
         self.name_edit = QLineEdit(self)
-        self.name_edit.setPlaceholderText("请输入账号")
-        layout.addWidget(QLabel("账号:"))
+        self.name_edit.setPlaceholderText("请输入用户名")
+        layout.addWidget(QLabel("用户名:"))
         layout.addWidget(self.name_edit)
 
         self.email_edit = QLineEdit(self)
@@ -19,7 +19,7 @@ class AddAccountDialog(QDialog):
         layout.addWidget(QLabel("邮箱:"))
         layout.addWidget(self.email_edit)
 
-        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel, self)
+        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel, self)
         buttons.accepted.connect(self.validate_and_accept)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)

@@ -17,9 +17,9 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QAbstractSpinBox, QApplication, QComboBox, QDateEdit,
     QFrame, QGridLayout, QHBoxLayout, QHeaderView,
-    QLabel, QPlainTextEdit, QPushButton, QSizePolicy,
-    QSpacerItem, QToolButton, QTreeWidget, QTreeWidgetItem,
-    QVBoxLayout, QWidget)
+    QLabel, QPlainTextEdit, QProgressBar, QPushButton,
+    QSizePolicy, QSpacerItem, QToolButton, QTreeWidget,
+    QTreeWidgetItem, QVBoxLayout, QWidget)
 
 class Ui_Home(object):
     def setupUi(self, Home):
@@ -244,6 +244,12 @@ class Ui_Home(object):
         self.label_4.setObjectName(u"label_4")
 
         self.gridLayout.addWidget(self.label_4, 0, 7, 1, 1)
+
+        self.progress = QProgressBar(self.wgt_header)
+        self.progress.setObjectName(u"progress")
+        self.progress.setValue(0)
+
+        self.gridLayout.addWidget(self.progress, 0, 12, 1, 1)
 
 
         self.gridLayout_3.addWidget(self.wgt_header, 0, 0, 1, 1)
