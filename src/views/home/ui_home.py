@@ -155,101 +155,100 @@ class Ui_Home(object):
         self.wgt_header.setMinimumSize(QSize(0, 0))
         self.gridLayout = QGridLayout(self.wgt_header)
         self.gridLayout.setObjectName(u"gridLayout")
-        self.line_4 = QFrame(self.wgt_header)
-        self.line_4.setObjectName(u"line_4")
-        self.line_4.setFrameShape(QFrame.Shape.VLine)
-        self.line_4.setFrameShadow(QFrame.Shadow.Sunken)
+        self.line_3 = QFrame(self.wgt_header)
+        self.line_3.setObjectName(u"line_3")
+        self.line_3.setFrameShape(QFrame.Shape.VLine)
+        self.line_3.setFrameShadow(QFrame.Shadow.Sunken)
 
-        self.gridLayout.addWidget(self.line_4, 0, 1, 1, 1)
-
-        self.horizontalSpacer = QSpacerItem(187, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
-
-        self.gridLayout.addItem(self.horizontalSpacer, 0, 16, 1, 1)
-
-        self.btn_export = QPushButton(self.wgt_header)
-        self.btn_export.setObjectName(u"btn_export")
-
-        self.gridLayout.addWidget(self.btn_export, 0, 17, 1, 1)
-
-        self.de_until = QDateEdit(self.wgt_header)
-        self.de_until.setObjectName(u"de_until")
-        self.de_until.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.NoButtons)
-
-        self.gridLayout.addWidget(self.de_until, 0, 9, 1, 1)
-
-        self.btn_ai_repot = QPushButton(self.wgt_header)
-        self.btn_ai_repot.setObjectName(u"btn_ai_repot")
-
-        self.gridLayout.addWidget(self.btn_ai_repot, 0, 15, 1, 1)
-
-        self.btn_settings = QToolButton(self.wgt_header)
-        self.btn_settings.setObjectName(u"btn_settings")
-        self.btn_settings.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
-
-        self.gridLayout.addWidget(self.btn_settings, 0, 0, 1, 1)
-
-        self.cbb_date = QComboBox(self.wgt_header)
-        self.cbb_date.setObjectName(u"cbb_date")
-
-        self.gridLayout.addWidget(self.cbb_date, 0, 10, 1, 1)
+        self.gridLayout.addWidget(self.line_3, 0, 13, 1, 1)
 
         self.line = QFrame(self.wgt_header)
         self.line.setObjectName(u"line")
         self.line.setFrameShape(QFrame.Shape.VLine)
         self.line.setFrameShadow(QFrame.Shadow.Sunken)
 
-        self.gridLayout.addWidget(self.line, 0, 6, 1, 1)
+        self.gridLayout.addWidget(self.line, 0, 5, 1, 1)
 
         self.btn_statistics = QPushButton(self.wgt_header)
         self.btn_statistics.setObjectName(u"btn_statistics")
 
-        self.gridLayout.addWidget(self.btn_statistics, 0, 2, 1, 1)
+        self.gridLayout.addWidget(self.btn_statistics, 0, 1, 1, 1)
+
+        self.cbb_date = QComboBox(self.wgt_header)
+        self.cbb_date.setObjectName(u"cbb_date")
+
+        self.gridLayout.addWidget(self.cbb_date, 0, 9, 1, 1)
+
+        self.btn_export = QPushButton(self.wgt_header)
+        self.btn_export.setObjectName(u"btn_export")
+
+        self.gridLayout.addWidget(self.btn_export, 0, 17, 1, 1)
+
+        self.cbb_theme = QComboBox(self.wgt_header)
+        self.cbb_theme.setObjectName(u"cbb_theme")
+
+        self.gridLayout.addWidget(self.cbb_theme, 0, 4, 1, 1)
 
         self.line_2 = QFrame(self.wgt_header)
         self.line_2.setObjectName(u"line_2")
         self.line_2.setFrameShape(QFrame.Shape.VLine)
         self.line_2.setFrameShadow(QFrame.Shadow.Sunken)
 
-        self.gridLayout.addWidget(self.line_2, 0, 3, 1, 1)
-
-        self.cbb_theme = QComboBox(self.wgt_header)
-        self.cbb_theme.setObjectName(u"cbb_theme")
-
-        self.gridLayout.addWidget(self.cbb_theme, 0, 5, 1, 1)
-
-        self.line_3 = QFrame(self.wgt_header)
-        self.line_3.setObjectName(u"line_3")
-        self.line_3.setFrameShape(QFrame.Shape.VLine)
-        self.line_3.setFrameShadow(QFrame.Shadow.Sunken)
-
-        self.gridLayout.addWidget(self.line_3, 0, 14, 1, 1)
-
-        self.de_since = QDateEdit(self.wgt_header)
-        self.de_since.setObjectName(u"de_since")
-        self.de_since.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.NoButtons)
-
-        self.gridLayout.addWidget(self.de_since, 0, 8, 1, 1)
+        self.gridLayout.addWidget(self.line_2, 0, 2, 1, 1)
 
         self.btn_get = QPushButton(self.wgt_header)
         self.btn_get.setObjectName(u"btn_get")
 
-        self.gridLayout.addWidget(self.btn_get, 0, 11, 1, 1)
-
-        self.label_3 = QLabel(self.wgt_header)
-        self.label_3.setObjectName(u"label_3")
-
-        self.gridLayout.addWidget(self.label_3, 0, 4, 1, 1)
+        self.gridLayout.addWidget(self.btn_get, 0, 10, 1, 1)
 
         self.label_4 = QLabel(self.wgt_header)
         self.label_4.setObjectName(u"label_4")
 
-        self.gridLayout.addWidget(self.label_4, 0, 7, 1, 1)
+        self.gridLayout.addWidget(self.label_4, 0, 6, 1, 1)
+
+        self.btn_ai_repot = QPushButton(self.wgt_header)
+        self.btn_ai_repot.setObjectName(u"btn_ai_repot")
+
+        self.gridLayout.addWidget(self.btn_ai_repot, 0, 15, 1, 1)
+
+        self.horizontalSpacer = QSpacerItem(187, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.gridLayout.addItem(self.horizontalSpacer, 0, 16, 1, 1)
 
         self.progress = QProgressBar(self.wgt_header)
         self.progress.setObjectName(u"progress")
         self.progress.setValue(0)
 
-        self.gridLayout.addWidget(self.progress, 0, 12, 1, 1)
+        self.gridLayout.addWidget(self.progress, 0, 11, 1, 1)
+
+        self.de_since = QDateEdit(self.wgt_header)
+        self.de_since.setObjectName(u"de_since")
+        self.de_since.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.NoButtons)
+
+        self.gridLayout.addWidget(self.de_since, 0, 7, 1, 1)
+
+        self.btn_settings = QToolButton(self.wgt_header)
+        self.btn_settings.setObjectName(u"btn_settings")
+        self.btn_settings.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
+
+        self.gridLayout.addWidget(self.btn_settings, 0, 14, 1, 1)
+
+        self.label_3 = QLabel(self.wgt_header)
+        self.label_3.setObjectName(u"label_3")
+
+        self.gridLayout.addWidget(self.label_3, 0, 3, 1, 1)
+
+        self.de_until = QDateEdit(self.wgt_header)
+        self.de_until.setObjectName(u"de_until")
+        self.de_until.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.NoButtons)
+
+        self.gridLayout.addWidget(self.de_until, 0, 8, 1, 1)
+
+        self.btn_filter = QToolButton(self.wgt_header)
+        self.btn_filter.setObjectName(u"btn_filter")
+        self.btn_filter.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
+
+        self.gridLayout.addWidget(self.btn_filter, 0, 12, 1, 1)
 
 
         self.gridLayout_3.addWidget(self.wgt_header, 0, 0, 1, 1)
@@ -266,12 +265,13 @@ class Ui_Home(object):
         self.btn_project_add.setText(QCoreApplication.translate("Home", u"+", None))
         self.btn_account_add.setText(QCoreApplication.translate("Home", u"+", None))
         self.label_2.setText(QCoreApplication.translate("Home", u"\u8d26\u53f7", None))
+        self.btn_statistics.setText(QCoreApplication.translate("Home", u"\u6570\u636e\u7edf\u8ba1", None))
         self.btn_export.setText(QCoreApplication.translate("Home", u"\u5bfc\u51fa", None))
+        self.btn_get.setText(QCoreApplication.translate("Home", u"\u83b7\u53d6", None))
+        self.label_4.setText(QCoreApplication.translate("Home", u"\u6570\u636e\u4fe1\u606f: ", None))
         self.btn_ai_repot.setText(QCoreApplication.translate("Home", u"AI \u603b\u7ed3", None))
         self.btn_settings.setText(QCoreApplication.translate("Home", u"\u8bbe\u7f6e", None))
-        self.btn_statistics.setText(QCoreApplication.translate("Home", u"\u6570\u636e\u7edf\u8ba1", None))
-        self.btn_get.setText(QCoreApplication.translate("Home", u"\u83b7\u53d6", None))
         self.label_3.setText(QCoreApplication.translate("Home", u"\u4e3b\u9898\u76ae\u80a4: ", None))
-        self.label_4.setText(QCoreApplication.translate("Home", u"\u6570\u636e\u4fe1\u606f: ", None))
+        self.btn_filter.setText(QCoreApplication.translate("Home", u"\u8fc7\u6ee4", None))
     # retranslateUi
 

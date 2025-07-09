@@ -1,6 +1,5 @@
 import json
 import os.path
-import subprocess
 
 import qtmodern6.styles
 import qt_themes
@@ -15,6 +14,7 @@ from PySide6.QtCore import Qt, QDate
 from PySide6.QtGui import QAction
 from git import Repo, InvalidGitRepositoryError
 from src.config.config import Config
+from src.views.settings.settings import Settings
 
 
 class Home(QWidget):
@@ -39,7 +39,7 @@ class Home(QWidget):
         self.init_date()
 
     def init_connect(self):
-        self.ui.btn_settings.clicked.connect(self.ui.wgt_right_content.show)
+        self.ui.btn_settings.clicked.connect(self.show_settings)
         self.ui.btn_statistics.clicked.connect(self.ui.wgt_right_content.show)
         self.ui.cbb_theme.currentTextChanged.connect(self.change_theme)
         self.ui.cbb_date.currentTextChanged.connect(self.change_date)
@@ -487,6 +487,7 @@ class Home(QWidget):
             )
             return
 
+        self.grouped_logs.clear()
         since, until = self.get_date_range(self.ui.cbb_date.currentText())
         self.git_log_manager = GitLogManager(max_threads=4)
         self.git_log_manager.log_collected.connect(self.on_log_collected)
@@ -530,8 +531,22 @@ class Home(QWidget):
                 self.ui.pte_commit_log.appendPlainText(f"{log['date']} {log['message']}")
             self.ui.pte_commit_log.appendPlainText("")
 
+    @staticmethod
+    def show_settings():
+        settings = Settings()
+        settings.exec()
+
     def ai_report(self):
-        pass
+        if not self.grouped_logs:
+            QMessageBox.warning(
+                self,
+                "错误",
+                "请先获取提交信息！"
+            )
+            return
+        self.ui.hbl_body.setStretch(2, 4)
+        self.ui.wgt_right_content.show()
+        self.ui.btn_export.show()
 
     def export_report(self):
         pass
