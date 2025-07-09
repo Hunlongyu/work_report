@@ -2,12 +2,13 @@ import json
 import os.path
 import qtmodern6.styles
 import qt_themes
+import pendulum
 
 from src.components.add_account_dialog import AddAccountDialog
 from src.views.home.ui_home import Ui_Home
 from PySide6.QtWidgets import QWidget, QApplication, QAbstractItemView, QTreeWidgetItem, QFileDialog, QMessageBox, \
     QMenu, QDialog
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QDate
 from PySide6.QtGui import QAction
 from git import Repo, InvalidGitRepositoryError
 from src.config.config import Config
@@ -26,9 +27,11 @@ class Home(QWidget):
         self.ui.hbl_body.setStretch(2, 0)
         self.ui.wgt_right_content.hide()
         self.ui.btn_export.hide()
+        pendulum.set_locale('zh')
         self.init_theme()
         self.init_project_wgt()
         self.init_account_wgt()
+        self.init_date()
 
     def init_connect(self):
         self.ui.btn_settings.clicked.connect(self.ui.wgt_right_content.show)
@@ -283,8 +286,68 @@ class Home(QWidget):
         except Exception as e:
             QMessageBox.critical(self, "错误", str(e))
 
-    def change_date(self):
-        pass
+    def init_date(self):
+        date_options = [
+            '今日', '昨日', '本周', '上周',
+            '本月', '上个月', '本季度', '上季度',
+            '上半年', '下半年', '今年'
+        ]
+        self.ui.cbb_date.addItems(date_options)
+        today = pendulum.today()
+        self.ui.de_since.setDate(today)
+        self.ui.de_until.setDate(today)
+
+    @staticmethod
+    def get_date_range(text: str) -> tuple[QDate, QDate]:
+        now = pendulum.today()
+        match text:
+            case '今日':
+                start = end = now
+            case '昨日':
+                start = end = now.subtract(days=1)
+            case '本周':
+                start = now.start_of('week')
+                end = now.end_of('week')
+            case '上周':
+                last_week = now.subtract(weeks=1)
+                start = last_week.start_of('week')
+                end = last_week.end_of('week')
+            case '本月':
+                start = now.start_of('month')
+                end = now.end_of('month')
+            case '上个月':
+                last_month = now.subtract(months=1)
+                start = last_month.start_of('month')
+                end = last_month.end_of('month')
+            case '本季度':
+                quarter = (now.month - 1) // 3 + 1
+                start = pendulum.datetime(now.year, 3 * (quarter - 1) + 1, 1)
+                end = start.add(months=3).subtract(days=1)
+            case '上季度':
+                quarter = (now.month - 1) // 3
+                if quarter == 0:
+                    start = pendulum.datetime(now.year - 1, 10, 1)
+                else:
+                    start = pendulum.datetime(now.year, 3 * (quarter - 1) + 1, 1)
+                end = start.add(months=3).subtract(days=1)
+            case '上半年':
+                start = pendulum.datetime(now.year, 1, 1)
+                end = pendulum.datetime(now.year, 6, 30)
+            case '下半年':
+                start = pendulum.datetime(now.year, 7, 1)
+                end = pendulum.datetime(now.year, 12, 31)
+            case '今年':
+                start = now.start_of('year')
+                end = now.end_of('year')
+            case _:
+                start = end = now
+
+        return QDate(start.year, start.month, start.day), QDate(end.year, end.month, end.day)
+
+    def change_date(self, text: str):
+        start, end = self.get_date_range(text)
+        self.ui.de_since.setDate(start)
+        self.ui.de_until.setDate(end)
 
     def get_commit_info(self):
         pass
