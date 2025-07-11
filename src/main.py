@@ -1,7 +1,6 @@
 import sys
 import qtmodern6.windows
 import qtmodern6.styles
-
 from PySide6 import QtWidgets
 from src.views.home.home import Home
 
