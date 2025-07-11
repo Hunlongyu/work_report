@@ -386,9 +386,12 @@ class Home(QWidget):
         now = pendulum.today()
         match text:
             case '今日':
-                start = end = now
+                start = now.start_of('day')
+                end = now.end_of('day')
             case '昨日':
-                start = end = now.subtract(days=1)
+                yesterday = now.subtract(days=1)
+                start = yesterday.start_of('day')
+                end = yesterday.end_of('day')
             case '本周':
                 start = now.start_of('week')
                 end = now.end_of('week')
@@ -427,6 +430,59 @@ class Home(QWidget):
                 start = end = now
 
         return QDate(start.year, start.month, start.day), QDate(end.year, end.month, end.day)
+
+    @staticmethod
+    def get_datetime_range(text: str) -> tuple[str, str]:
+        """返回用于 git log 的日期时间字符串格式"""
+        now = pendulum.today()
+        match text:
+            case '今日':
+                start = now.start_of('day')
+                end = now.end_of('day')
+            case '昨日':
+                yesterday = now.subtract(days=1)
+                start = yesterday.start_of('day')
+                end = yesterday.end_of('day')
+            case '本周':
+                start = now.start_of('week')
+                end = now.end_of('week')
+            case '上周':
+                last_week = now.subtract(weeks=1)
+                start = last_week.start_of('week')
+                end = last_week.end_of('week')
+            case '本月':
+                start = now.start_of('month')
+                end = now.end_of('month')
+            case '上个月':
+                last_month = now.subtract(months=1)
+                start = last_month.start_of('month')
+                end = last_month.end_of('month')
+            case '本季度':
+                quarter = (now.month - 1) // 3 + 1
+                start = pendulum.datetime(now.year, 3 * (quarter - 1) + 1, 1).start_of('day')
+                end = start.add(months=3).subtract(days=1).end_of('day')
+            case '上季度':
+                quarter = (now.month - 1) // 3
+                if quarter == 0:
+                    start = pendulum.datetime(now.year - 1, 10, 1).start_of('day')
+                else:
+                    start = pendulum.datetime(now.year, 3 * (quarter - 1) + 1, 1).start_of('day')
+                end = start.add(months=3).subtract(days=1).end_of('day')
+            case '上半年':
+                start = pendulum.datetime(now.year, 1, 1).start_of('day')
+                end = pendulum.datetime(now.year, 6, 30).end_of('day')
+            case '下半年':
+                start = pendulum.datetime(now.year, 7, 1).start_of('day')
+                end = pendulum.datetime(now.year, 12, 31).end_of('day')
+            case '今年':
+                start = now.start_of('year')
+                end = now.end_of('year')
+            case _:
+                start = now.start_of('day')
+                end = now.end_of('day')
+
+        # 返回 ISO 格式的日期时间字符串，git log 可以直接使用
+        return start.to_iso8601_string(), end.to_iso8601_string()
 
     def change_date(self, text: str):
         start, end = self.get_date_range(text)
@@ -488,13 +544,13 @@ class Home(QWidget):
             return
 
         self.grouped_logs.clear()
-        since, until = self.get_date_range(self.ui.cbb_date.currentText())
+        since_str, until_str = self.get_datetime_range(self.ui.cbb_date.currentText())
         self.git_log_manager = GitLogManager(max_threads=4)
         self.git_log_manager.log_collected.connect(self.on_log_collected)
         self.git_log_manager.error.connect(self.on_log_error)
         self.git_log_manager.progress.connect(self.on_progress)
         self.git_log_manager.finished.connect(self.on_all_finished)
-        self.git_log_manager.start(project_map, selected_authors, since, until)
+        self.git_log_manager.start(project_map, selected_authors, since_str, until_str)
 
     def on_log_collected(self, project, branch, author, logs):
         key = (project, branch, author)
