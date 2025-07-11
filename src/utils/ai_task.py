@@ -38,7 +38,6 @@ class AITask(QRunnable):
             reply = response.choices[0].message.content
             if not reply.strip():
                 raise ValueError("API 返回内容为空！")
-            print("reply", not reply.strip())
             self.signals.success.emit(reply)
 
         except Exception as e:

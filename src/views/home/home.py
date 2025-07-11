@@ -12,7 +12,7 @@ from PySide6.QtWidgets import QWidget, QApplication, QAbstractItemView, QTreeWid
     QMenu, QDialog
 from PySide6.QtCore import Qt, QDate, QThreadPool
 from PySide6.QtGui import QAction, QGuiApplication
-from git import Repo, InvalidGitRepositoryError
+from git import Repo, InvalidGitRepositoryError, GitCommandError
 from src.config.config import Config
 from src.views.settings.settings import Settings
 from src.utils.ai_task import AITask
@@ -39,6 +39,11 @@ class Home(QWidget):
         self.init_project_wgt()
         self.init_account_wgt()
         self.init_date()
+        self.ui.pte_commit_log.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        # TODO
+        self.ui.btn_statistics.hide()
+        self.ui.btn_filter.hide()
+        self.ui.line_2.hide()
 
     def init_connect(self):
         self.ui.btn_settings.clicked.connect(self.show_settings)
@@ -127,9 +132,9 @@ class Home(QWidget):
             if child.checkState(0) == Qt.CheckState.Checked:
                 branch_data = child.data(0, Qt.ItemDataRole.UserRole)
                 if branch_data:
-                    if branch_data["type"] == "remote":
-                        checked.append(f"remote/{branch_data['remote']}/{branch_data['name']}")
-                    elif branch_data["type"] == "local":
+                    # if branch_data["type"] == "remote":
+                    #     checked.append(f"remote/{branch_data['remote']}/{branch_data['name']}")
+                    if branch_data["type"] == "local":
                         checked.append(f"local/{branch_data['name']}")
 
         with Config().group("projects"):
@@ -174,10 +179,49 @@ class Home(QWidget):
             return
 
         menu = QMenu(self)
-        delete_action = QAction("删除项目", self)
-        delete_action.triggered.connect(lambda: self.remove_project(item))
-        menu.addAction(delete_action)
+        # 检查是否是顶层项目节点
+        if item.parent() is None:
+            # 项目节点右键菜单：可以添加删除项目或者 fetch 所有远程的选项
+            delete_action = QAction("删除项目", self)
+            delete_action.triggered.connect(lambda: self.remove_project(item))
+            menu.addAction(delete_action)
+
+            fetch_all_remotes_action = QAction("获取所有远程更新", self)
+            fetch_all_remotes_action.triggered.connect(lambda: self.fetch_project_all_remotes(item))
+            menu.addAction(fetch_all_remotes_action)
         menu.exec_(self.ui.twgt_project.viewport().mapToGlobal(pos))
+
+    def fetch_project_all_remotes(self, project_item: QTreeWidgetItem):
+        """
+        获取整个项目所有远程仓库的最新提交。
+        """
+        project_name = project_item.text(0)
+        with Config().group("projects"):
+            project_data_str = Config().get(project_name, "{}")
+            try:
+                project_config = json.loads(project_data_str)
+                repo_path = project_config.get('path')
+            except json.JSONDecodeError:
+                QMessageBox.critical(self, "错误", f"无法解析项目 [{project_name}] 的配置。")
+                return
+
+        if not repo_path or not os.path.isdir(repo_path):
+            QMessageBox.critical(self, "错误", f"项目 [{project_name}] 路径无效或不存在。")
+            return
+
+        try:
+            repo = Repo(repo_path)
+            for remote in repo.remotes:
+                remote.fetch()  # fetch 所有远程
+
+            QMessageBox.information(self, "更新成功", f"项目 [{project_name}] 已成功获取所有远程的最新提交。")
+
+        except InvalidGitRepositoryError:
+            QMessageBox.critical(self, "错误", f"路径 [{repo_path}] 不是一个有效的 Git 仓库。")
+        except GitCommandError as e:
+            QMessageBox.critical(self, "Git 错误", f"执行 Git Fetch 失败：\n{e.stderr.strip()}")
+        except Exception as e:
+            QMessageBox.critical(self, "错误", f"获取项目 [{project_name}] 更新失败：{e}")
 
     def remove_project(self, item):
         project_name = item.text(0)
@@ -238,30 +282,12 @@ class Home(QWidget):
 
         remote_branch_names = set()
 
-        # 添加远程分支
-        for remote in repo.remotes:
-            for ref in remote.refs:
-                if ref.remote_head not in ["HEAD"]:
-                    name = ref.remote_head
-                    full_name = f"remote/{remote.name}/{name}"
-                    remote_branch_names.add(name)
-                    item = QTreeWidgetItem(project_item)
-                    item.setText(0, name)
-                    item.setData(0, Qt.ItemDataRole.UserRole, {
-                        "type": "remote",
-                        "remote": remote.name,
-                        "name": name
-                    })
-                    item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
-                    item.setCheckState(0,
-                                       Qt.CheckState.Checked if full_name in checked_set else Qt.CheckState.Unchecked)
-
         # 添加仅本地分支
         for branch in repo.branches:
             if branch.name not in remote_branch_names:
                 full_name = f"local/{branch.name}"
                 item = QTreeWidgetItem(project_item)
-                item.setText(0, f"{branch.name}（仅本地）")
+                item.setText(0, branch.name)
                 item.setData(0, Qt.ItemDataRole.UserRole, {
                     "type": "local",
                     "name": branch.name
@@ -362,7 +388,7 @@ class Home(QWidget):
                 self.ui.twgt_account.addTopLevelItem(item)
 
     @staticmethod
-    def on_account_item_changed(item: QTreeWidgetItem, column: int):
+    def on_account_item_changed(item: QTreeWidgetItem):
         account = item.text(0)
         email = item.text(1)
         checked = item.checkState(0) == Qt.CheckState.Checked
@@ -579,13 +605,13 @@ class Home(QWidget):
             self.ui.pte_commit_log.appendPlainText(f"【项目】{project}\n【分支】{branch}\n【账号】{author}")
 
             # 当前组去重
-            deduped_logs = []
+            unique_logs = []
             for log in logs:
                 if log["commit"] not in unique_commits:
                     unique_commits.add(log["commit"])
-                    deduped_logs.append(log)
+                    unique_logs.append(log)
 
-            for log in deduped_logs:
+            for log in unique_logs:
                 self.ui.pte_commit_log.appendPlainText(f"{log['date']} {log['message']}")
             self.ui.pte_commit_log.appendPlainText("")
 
@@ -593,6 +619,20 @@ class Home(QWidget):
     def show_settings():
         settings = Settings()
         settings.exec()
+
+    def handle_success(self, msg):
+        print("总结成功")
+        self.ui.hbl_body.setStretch(2, 4)
+        self.ui.wgt_right_content.show()
+        self.ui.btn_export.show()
+        self.ui.pte_ai_report.setPlainText(msg)
+        self.ui.btn_ai_report.setText("AI 总结")
+        self.ui.btn_ai_report.setEnabled(True)
+
+    def handle_error(self, msg):
+        self.ui.btn_ai_report.setText("AI 总结")
+        self.ui.btn_ai_report.setEnabled(True)
+        QMessageBox.critical(self, '错误', f"总结失败：\n{msg}")
 
     def ai_report(self):
         if not self.grouped_logs:
@@ -617,6 +657,7 @@ class Home(QWidget):
 
         git_log = self.ui.pte_commit_log.toPlainText()
         self.ui.btn_ai_report.setText("生成中...")
+        self.ui.btn_ai_report.setEnabled(False)
         self.ui.pte_ai_report.clear()
 
         task = AITask(
@@ -626,21 +667,8 @@ class Home(QWidget):
             prompt,
             git_log
         )
-
-        def handle_success(msg):
-            print("总结成功")
-            self.ui.hbl_body.setStretch(2, 4)
-            self.ui.wgt_right_content.show()
-            self.ui.btn_export.show()
-            self.ui.pte_ai_report.setPlainText(msg)
-            self.ui.btn_ai_report.setText("AI 总结")
-
-        def handle_error(msg):
-            self.ui.btn_ai_report.setText("AI 总结")
-            QMessageBox.critical(self, '错误', f"总结失败：\n{msg}")
-
-        task.signals.success.connect(handle_success)
-        task.signals.error.connect(handle_error)
+        task.signals.success.connect(self.handle_success)
+        task.signals.error.connect(self.handle_error)
         self.thread_pool.start(task)
 
     def export_report(self):
