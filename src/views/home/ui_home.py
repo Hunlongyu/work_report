@@ -133,10 +133,10 @@ class Ui_Home(object):
         self.gridLayout_6 = QGridLayout(self.wgt_right_content)
         self.gridLayout_6.setObjectName(u"gridLayout_6")
         self.gridLayout_6.setContentsMargins(0, 0, -1, -1)
-        self.pte_ai_repot = QPlainTextEdit(self.wgt_right_content)
-        self.pte_ai_repot.setObjectName(u"pte_ai_repot")
+        self.pte_ai_report = QPlainTextEdit(self.wgt_right_content)
+        self.pte_ai_report.setObjectName(u"pte_ai_report")
 
-        self.gridLayout_6.addWidget(self.pte_ai_repot, 0, 0, 1, 1)
+        self.gridLayout_6.addWidget(self.pte_ai_report, 0, 0, 1, 1)
 
 
         self.vbl_right.addWidget(self.wgt_right_content)
@@ -206,10 +206,10 @@ class Ui_Home(object):
 
         self.gridLayout.addWidget(self.label_4, 0, 6, 1, 1)
 
-        self.btn_ai_repot = QPushButton(self.wgt_header)
-        self.btn_ai_repot.setObjectName(u"btn_ai_repot")
+        self.btn_ai_report = QPushButton(self.wgt_header)
+        self.btn_ai_report.setObjectName(u"btn_ai_report")
 
-        self.gridLayout.addWidget(self.btn_ai_repot, 0, 15, 1, 1)
+        self.gridLayout.addWidget(self.btn_ai_report, 0, 15, 1, 1)
 
         self.horizontalSpacer = QSpacerItem(187, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
@@ -266,10 +266,10 @@ class Ui_Home(object):
         self.btn_account_add.setText(QCoreApplication.translate("Home", u"+", None))
         self.label_2.setText(QCoreApplication.translate("Home", u"\u8d26\u53f7", None))
         self.btn_statistics.setText(QCoreApplication.translate("Home", u"\u6570\u636e\u7edf\u8ba1", None))
-        self.btn_export.setText(QCoreApplication.translate("Home", u"\u5bfc\u51fa", None))
+        self.btn_export.setText(QCoreApplication.translate("Home", u"\u590d\u5236", None))
         self.btn_get.setText(QCoreApplication.translate("Home", u"\u83b7\u53d6", None))
         self.label_4.setText(QCoreApplication.translate("Home", u"\u6570\u636e\u4fe1\u606f: ", None))
-        self.btn_ai_repot.setText(QCoreApplication.translate("Home", u"AI \u603b\u7ed3", None))
+        self.btn_ai_report.setText(QCoreApplication.translate("Home", u"AI \u603b\u7ed3", None))
         self.btn_settings.setText(QCoreApplication.translate("Home", u"\u8bbe\u7f6e", None))
         self.label_3.setText(QCoreApplication.translate("Home", u"\u4e3b\u9898\u76ae\u80a4: ", None))
         self.btn_filter.setText(QCoreApplication.translate("Home", u"\u8fc7\u6ee4", None))

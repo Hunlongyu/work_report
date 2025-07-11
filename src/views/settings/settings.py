@@ -1,8 +1,9 @@
 from src.views.settings.ui_settings import Ui_Settings
-from PySide6.QtWidgets import QDialog, QMessageBox, QLineEdit, QToolButton
-from PySide6.QtCore import QEventLoop
+from PySide6.QtWidgets import QDialog, QMessageBox, QLineEdit
+from PySide6.QtCore import QThreadPool
 from src.config.config import Config
-from openai import AsyncOpenAI
+from src.utils.ai_utils import AIKeyCheckTask
+
 
 class Settings(QDialog):
     def __init__(self):
@@ -10,6 +11,7 @@ class Settings(QDialog):
         self.ui = Ui_Settings()
         self.ui.setupUi(self)
         self.setWindowTitle('设置')
+        self.thread_pool = QThreadPool()
         self.init_ui()
         self.init_connect()
 
@@ -34,22 +36,7 @@ class Settings(QDialog):
             self.ui.le_key.setEchoMode(QLineEdit.EchoMode.Password)
             self.ui.btn_show.setText('显示')
 
-    @staticmethod
-    async def async_check_key(api_key, base_url, model):
-        client = AsyncOpenAI(api_key=api_key, base_url=base_url)
-
-        try:
-            response = await client.chat.completions.create(
-                model=model,
-                messages=[{"role": "user", "content": "Hi"}],
-                max_tokens=1
-            )
-            return bool(response.choices[0].message.content)
-        except Exception as e:
-            print(f"Error: {type(e).__name__}: {e}")
-            return False
-
-    async def check_key(self):
+    def check_key(self):
         print("Checking key...")
         if not all([
             self.ui.le_key.text().strip(),
@@ -65,18 +52,28 @@ class Settings(QDialog):
         self.ui.btn_check.setEnabled(False)
         self.ui.btn_check.setText("验证中...")
 
-        try:
-            valid = await self.async_check_key(
-                self.ui.le_key.text(),
-                self.ui.le_address.text(),
-                self.ui.le_model.text()
-            )
-            QMessageBox.information(self, '成功', 'Key 有效！' if valid else 'Key 无效')
-        except Exception as e:
-            QMessageBox.warning(self, '警告', f'Error: {e}')
-        finally:
+        task = AIKeyCheckTask(
+            self.ui.le_key.text(),
+            self.ui.le_address.text(),
+            self.ui.le_model.text()
+        )
+
+        def handle_success(valid):
             self.ui.btn_check.setEnabled(True)
             self.ui.btn_check.setText("验证 Key")
+            if valid:
+                QMessageBox.information(self, '成功', '✅ Key 验证成功！')
+            else:
+                QMessageBox.warning(self, '无效', '❌ Key 无效或无返回内容。')
+
+        def handle_error(msg):
+            self.ui.btn_check.setEnabled(True)
+            self.ui.btn_check.setText("验证 Key")
+            QMessageBox.critical(self, '错误', f"验证失败：\n{msg}")
+
+        task.signals.success.connect(handle_success)
+        task.signals.error.connect(handle_error)
+        self.thread_pool.start(task)
 
     def save_settings(self):
         Config().begin_group('settings')

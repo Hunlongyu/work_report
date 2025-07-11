@@ -210,7 +210,7 @@
            <number>0</number>
           </property>
           <item row="0" column="0">
-           <widget class="QPlainTextEdit" name="pte_ai_repot"/>
+           <widget class="QPlainTextEdit" name="pte_ai_report"/>
           </item>
          </layout>
         </widget>
@@ -255,7 +255,7 @@
       <item row="0" column="17">
        <widget class="QPushButton" name="btn_export">
         <property name="text">
-         <string>导出</string>
+         <string>复制</string>
         </property>
        </widget>
       </item>
@@ -284,7 +284,7 @@
        </widget>
       </item>
       <item row="0" column="15">
-       <widget class="QPushButton" name="btn_ai_repot">
+       <widget class="QPushButton" name="btn_ai_report">
         <property name="text">
          <string>AI 总结</string>
         </property>

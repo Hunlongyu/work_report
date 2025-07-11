@@ -10,11 +10,12 @@ from src.utils.git_log_worker import GitLogManager
 from src.views.home.ui_home import Ui_Home
 from PySide6.QtWidgets import QWidget, QApplication, QAbstractItemView, QTreeWidgetItem, QFileDialog, QMessageBox, \
     QMenu, QDialog
-from PySide6.QtCore import Qt, QDate
-from PySide6.QtGui import QAction
+from PySide6.QtCore import Qt, QDate, QThreadPool
+from PySide6.QtGui import QAction, QGuiApplication
 from git import Repo, InvalidGitRepositoryError
 from src.config.config import Config
 from src.views.settings.settings import Settings
+from src.utils.ai_task import AITask
 
 
 class Home(QWidget):
@@ -24,6 +25,7 @@ class Home(QWidget):
         self.git_log_manager = None
         self.ui = Ui_Home()
         self.ui.setupUi(self)
+        self.thread_pool = QThreadPool()
         self.init_ui()
         self.init_connect()
         self.grouped_logs = {}
@@ -44,7 +46,7 @@ class Home(QWidget):
         self.ui.cbb_theme.currentTextChanged.connect(self.change_theme)
         self.ui.cbb_date.currentTextChanged.connect(self.change_date)
         self.ui.btn_get.clicked.connect(self.get_commit_info)
-        self.ui.btn_ai_repot.clicked.connect(self.ai_report)
+        self.ui.btn_ai_report.clicked.connect(self.ai_report)
         self.ui.btn_export.clicked.connect(self.export_report)
         self.ui.btn_project_add.clicked.connect(self.add_project)
         self.ui.twgt_project.itemChanged.connect(self.on_project_item_changed)
@@ -600,9 +602,61 @@ class Home(QWidget):
                 "请先获取提交信息！"
             )
             return
-        self.ui.hbl_body.setStretch(2, 4)
-        self.ui.wgt_right_content.show()
-        self.ui.btn_export.show()
+
+        api_key = Config().get('settings/key', '')
+        api_url = Config().get('settings/address', '')
+        api_model = Config().get('settings/model', '')
+        prompt = Config().get('settings/prompt', '')
+        if not api_key or not api_url or not api_model or not prompt:
+            QMessageBox.warning(
+                self,
+                "错误",
+                "请先确认正确的填写了 ai 设置项。"
+            )
+            return
+
+        git_log = self.ui.pte_commit_log.toPlainText()
+        self.ui.btn_ai_report.setText("生成中...")
+        self.ui.pte_ai_report.clear()
+
+        task = AITask(
+            api_key,
+            api_url,
+            api_model,
+            prompt,
+            git_log
+        )
+
+        def handle_success(msg):
+            print("总结成功")
+            self.ui.hbl_body.setStretch(2, 4)
+            self.ui.wgt_right_content.show()
+            self.ui.btn_export.show()
+            self.ui.pte_ai_report.setPlainText(msg)
+            self.ui.btn_ai_report.setText("AI 总结")
+
+        def handle_error(msg):
+            self.ui.btn_ai_report.setText("AI 总结")
+            QMessageBox.critical(self, '错误', f"总结失败：\n{msg}")
+
+        task.signals.success.connect(handle_success)
+        task.signals.error.connect(handle_error)
+        self.thread_pool.start(task)
 
     def export_report(self):
-        pass
+        report_text = self.ui.pte_ai_report.toPlainText()
+
+        if not report_text.strip():
+            QMessageBox.warning(
+                self,
+                "错误",
+                "报告为空，请先生成！"
+            )
+        clipboard = QGuiApplication.clipboard()
+        clipboard.setText(report_text)
+
+        QMessageBox.information(
+            self,
+            "成功",
+            "AI 报告已复制到剪贴板！"
+        )
