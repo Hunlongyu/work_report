@@ -30,15 +30,10 @@ class Ui_Settings(object):
         self.gb_prompt.setObjectName(u"gb_prompt")
         self.gridLayout_3 = QGridLayout(self.gb_prompt)
         self.gridLayout_3.setObjectName(u"gridLayout_3")
-        self.lb_tips = QLabel(self.gb_prompt)
-        self.lb_tips.setObjectName(u"lb_tips")
-
-        self.gridLayout_3.addWidget(self.lb_tips, 0, 0, 1, 1)
-
         self.pte_prompt = QPlainTextEdit(self.gb_prompt)
         self.pte_prompt.setObjectName(u"pte_prompt")
 
-        self.gridLayout_3.addWidget(self.pte_prompt, 1, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.pte_prompt, 0, 0, 1, 2)
 
 
         self.gridLayout.addWidget(self.gb_prompt, 1, 0, 1, 1)
@@ -100,17 +95,22 @@ class Ui_Settings(object):
         self.gridLayout_2.setContentsMargins(0, -1, 0, -1)
         self.horizontalSpacer = QSpacerItem(583, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
-        self.gridLayout_2.addItem(self.horizontalSpacer, 0, 0, 1, 1)
+        self.gridLayout_2.addItem(self.horizontalSpacer, 0, 1, 1, 1)
 
         self.btn_close = QPushButton(self.gb_footer)
         self.btn_close.setObjectName(u"btn_close")
 
-        self.gridLayout_2.addWidget(self.btn_close, 0, 1, 1, 1)
+        self.gridLayout_2.addWidget(self.btn_close, 0, 2, 1, 1)
 
         self.btn_save = QPushButton(self.gb_footer)
         self.btn_save.setObjectName(u"btn_save")
 
-        self.gridLayout_2.addWidget(self.btn_save, 0, 2, 1, 1)
+        self.gridLayout_2.addWidget(self.btn_save, 0, 3, 1, 1)
+
+        self.btn_default = QPushButton(self.gb_footer)
+        self.btn_default.setObjectName(u"btn_default")
+
+        self.gridLayout_2.addWidget(self.btn_default, 0, 0, 1, 1)
 
 
         self.gridLayout.addWidget(self.gb_footer, 2, 0, 1, 1)
@@ -124,7 +124,6 @@ class Ui_Settings(object):
     def retranslateUi(self, Settings):
         Settings.setWindowTitle(QCoreApplication.translate("Settings", u"Dialog", None))
         self.gb_prompt.setTitle(QCoreApplication.translate("Settings", u"\u63d0\u793a\u8bcd", None))
-        self.lb_tips.setText(QCoreApplication.translate("Settings", u"TextLabel", None))
         self.gb_settings.setTitle(QCoreApplication.translate("Settings", u"AI \u8bbe\u7f6e", None))
         self.label_2.setText(QCoreApplication.translate("Settings", u"API \u5730\u5740", None))
         self.btn_check.setText(QCoreApplication.translate("Settings", u"\u68c0\u67e5", None))
@@ -133,5 +132,6 @@ class Ui_Settings(object):
         self.btn_show.setText(QCoreApplication.translate("Settings", u"\u663e\u793a", None))
         self.btn_close.setText(QCoreApplication.translate("Settings", u"\u5173\u95ed", None))
         self.btn_save.setText(QCoreApplication.translate("Settings", u"\u4fdd\u5b58", None))
+        self.btn_default.setText(QCoreApplication.translate("Settings", u"\u9ed8\u8ba4\u63d0\u793a\u8bcd", None))
     # retranslateUi
 

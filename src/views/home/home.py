@@ -31,7 +31,7 @@ class Home(QWidget):
         self.grouped_logs = {}
 
     def init_ui(self):
-        self.setWindowTitle('工作总结报告')
+        self.setWindowTitle('AI 工作总结')
         self.ui.hbl_body.setStretch(2, 0)
         self.ui.wgt_right_content.hide()
         self.ui.btn_export.hide()
