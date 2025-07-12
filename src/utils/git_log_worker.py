@@ -22,10 +22,14 @@ class GitLogTask(QRunnable):
 
     def run(self):
         try:
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            startupinfo.wShowWindow = subprocess.SW_HIDE
+
             if not self.branch.startswith("origin/"):
                 # 获取所有分支，包含 remote 的
                 result = subprocess.run(['git', 'branch', '-a'], cwd=self.repo_path,
-                                        stdout=subprocess.PIPE, text=True)
+                                        stdout=subprocess.PIPE, text=True, startupinfo=startupinfo, creationflags=subprocess.CREATE_NO_WINDOW)
                 all_branches = result.stdout
                 possible_remote = f"remotes/origin/{self.branch}"
                 if possible_remote in all_branches:
@@ -39,13 +43,14 @@ class GitLogTask(QRunnable):
                 '--date=iso',
                 self.branch
             ]
-            print(cmd)
             result = subprocess.run(
                 cmd,
                 cwd=self.repo_path,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                encoding="utf-8"
+                encoding="utf-8",
+                startupinfo=startupinfo,
+                creationflags=subprocess.CREATE_NO_WINDOW
             )
             if result.returncode != 0:
                 self.signals.error.emit(
