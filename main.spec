@@ -7,7 +7,7 @@ a = Analysis(
     binaries=[
         ('src/components', 'src/components'),
         ('src/config', 'src/config'),
-        ('src/resources/app.ico', 'src/resources/app.ico'),
+        ('src/resources/app.ico', 'src/resources'),
         ('src/utils', 'src/utils'),
         ('src/views', 'src/views'),
         *collect_data_files('qtmodern6'),

@@ -12,12 +12,12 @@ def resource_path(relative_path):
     return os.path.join(os.path.abspath('.'), relative_path)
 
 if __name__ == "__main__":
-    app = QtWidgets.QApplication()
+    app = QtWidgets.QApplication(sys.argv)
     qtmodern6.styles.dark(app)
     home = Home()
     mw = qtmodern6.windows.ModernWindow(home)
     icon_path = resource_path("src/resources/app.ico")
-    mw.setWindowIcon(QIcon(icon_path))
+    mw.setWindowIcon(QIcon(str(icon_path)))
     mw.move(
         QtWidgets.QApplication.primaryScreen().geometry().center() - mw.rect().center()
     )

@@ -1,6 +1,9 @@
+import sys
+import os
 from src.views.settings.ui_settings import Ui_Settings
 from PySide6.QtWidgets import QDialog, QMessageBox, QLineEdit
 from PySide6.QtCore import QThreadPool
+from PySide6.QtGui import QIcon
 from src.config.config import Config
 from src.utils.ai_utils import AIKeyCheckTask
 
@@ -16,7 +19,14 @@ class Settings(QDialog):
         self.init_ui()
         self.init_connect()
 
+    def resource_path(self, relative_path):
+        if hasattr(sys, '_MEIPASS'):
+            return os.path.join(sys._MEIPASS, relative_path)
+        return os.path.join(os.path.abspath('.'), relative_path)
+
     def init_ui(self):
+        icon_path = self.resource_path("src/resources/app.ico")
+        self.setWindowIcon(QIcon(str(icon_path)))
         self.ui.le_key.setText(Config().get('settings/key', ''))
         self.ui.le_key.setEchoMode(QLineEdit.EchoMode.Password)
         self.ui.le_address.setText(Config().get('settings/address', ''))
