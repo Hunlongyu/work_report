@@ -39,7 +39,7 @@ class GitLogTask(QRunnable):
                 f'--author={self.author}',
                 f'--since={self.since}',
                 f'--until={self.until}',
-                '--pretty=format:%h%x1f%ad%x1f%s%x1e',
+                '--pretty=format:%h%x1f%ad%x1f%s%n%b%x1e',
                 '--date=iso',
                 self.branch
             ]
@@ -58,7 +58,7 @@ class GitLogTask(QRunnable):
                 )
                 return
 
-            raw_output = result.stdout.strip('\x1e').split('\x1e')
+            raw_output = result.stdout.rstrip('\x1e').split('\x1e')
             logs = []
             for entry in raw_output:
                 if not entry.strip():
@@ -68,7 +68,7 @@ class GitLogTask(QRunnable):
                     logs.append({
                         "commit": parts[0],
                         "date": parts[1],
-                        "message": parts[2]
+                        "message": parts[2].strip()
                     })
 
             self.signals.finished.emit(self.project_name, self.branch, self.author, logs)
