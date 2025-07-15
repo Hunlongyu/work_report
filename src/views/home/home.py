@@ -26,9 +26,10 @@ class Home(QWidget):
         self.ui = Ui_Home()
         self.ui.setupUi(self)
         self.thread_pool = QThreadPool()
+        self._date_changing_by_combo = False
+        self.grouped_logs = {}
         self.init_ui()
         self.init_connect()
-        self.grouped_logs = {}
 
     def init_ui(self):
         self.setWindowTitle('AI 工作总结')
@@ -50,6 +51,8 @@ class Home(QWidget):
         self.ui.btn_statistics.clicked.connect(self.ui.wgt_right_content.show)
         self.ui.cbb_theme.currentTextChanged.connect(self.change_theme)
         self.ui.cbb_date.currentTextChanged.connect(self.change_date)
+        self.ui.de_since.dateChanged.connect(self.on_date_edited)
+        self.ui.de_until.dateChanged.connect(self.on_date_edited)
         self.ui.btn_get.clicked.connect(self.get_commit_info)
         self.ui.btn_ai_report.clicked.connect(self.ai_report)
         self.ui.btn_export.clicked.connect(self.export_report)
@@ -279,21 +282,16 @@ class Home(QWidget):
     def _add_branch_items(project_item, repo, checked_set=None):
         if checked_set is None:
             checked_set = set()
-
-        remote_branch_names = set()
-
-        # 添加仅本地分支
         for branch in repo.branches:
-            if branch.name not in remote_branch_names:
-                full_name = f"local/{branch.name}"
-                item = QTreeWidgetItem(project_item)
-                item.setText(0, branch.name)
-                item.setData(0, Qt.ItemDataRole.UserRole, {
-                    "type": "local",
-                    "name": branch.name
-                })
-                item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
-                item.setCheckState(0, Qt.CheckState.Checked if full_name in checked_set else Qt.CheckState.Unchecked)
+            full_name = f"local/{branch.name}"
+            item = QTreeWidgetItem(project_item)
+            item.setText(0, branch.name)
+            item.setData(0, Qt.ItemDataRole.UserRole, {
+                "type": "local",
+                "name": branch.name
+            })
+            item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
+            item.setCheckState(0, Qt.CheckState.Checked if full_name in checked_set else Qt.CheckState.Unchecked)
 
     def add_project(self):
         last_dir = Config().get('settings/last_dir', os.path.expanduser('~'))
@@ -306,7 +304,8 @@ class Home(QWidget):
             repo = Repo(folder_path, search_parent_directories=True)
             project_name = os.path.basename(folder_path.rstrip(os.sep))
             project_item = self.add_project_to_tree(project_name)
-            self._add_branch_items(project_item, repo)
+            project_item.setData(0, Qt.ItemDataRole.UserRole, folder_path)
+            self._add_branch_items(project_item, repo, checked_set=set())
             project_item.setExpanded(True)
 
             project_data = {
@@ -341,68 +340,92 @@ class Home(QWidget):
         menu.exec_(self.ui.twgt_account.viewport().mapToGlobal(pos))
 
     def remove_account(self, item: QTreeWidgetItem):
-        account = item.text(0)
+        """删除账号（JSON格式）"""
+        name = item.text(0)
         reply = QMessageBox.question(
             self, "确认删除",
-            f"是否删除账号 [{account}]？",
+            f"是否删除账号 [{name}]？",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
         if reply != QMessageBox.StandardButton.Yes:
             return
 
-        # 删除配置
+        # 从配置中删除
         with Config().group("accounts"):
-            Config().remove(account)
+            accounts_json = Config().get("account_list", "{}")
+            accounts = json.loads(accounts_json) if accounts_json else {}
 
-        # 删除 UI
-        index = self.ui.twgt_account.indexOfTopLevelItem(item)
-        self.ui.twgt_account.takeTopLevelItem(index)
+            if name in accounts:
+                del accounts[name]
+                Config().set("account_list", json.dumps(accounts, ensure_ascii=False))
+
+        # 从UI中删除
+        self.ui.twgt_account.takeTopLevelItem(self.ui.twgt_account.indexOfTopLevelItem(item))
 
     def add_account(self):
+        """添加新账号（保存为JSON格式）"""
         dialog = AddAccountDialog(self)
         if dialog.exec() == QDialog.DialogCode.Accepted:
             name, email = dialog.get_account_info()
 
+            # 创建UI项
             item = QTreeWidgetItem([name, email])
             item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
-            item.setCheckState(0, Qt.CheckState.Checked)
+            item.setCheckState(0, Qt.CheckState.Unchecked)  # 默认不勾选
             self.ui.twgt_account.addTopLevelItem(item)
 
+            # 读取现有账号
             with Config().group("accounts"):
-                Config().set(name, json.dumps({
+                accounts_json = Config().get("account_list", "{}")
+                accounts = json.loads(accounts_json) if accounts_json else {}
+
+                # 添加新账号（保留大小写）
+                accounts[name] = {
                     "email": email,
-                    "checked": True
-                }, ensure_ascii=False))
+                    "checked": False  # 默认未选中
+                }
+
+                # 保存回配置文件
+                Config().set("account_list", json.dumps(accounts, ensure_ascii=False))
 
     def load_accounts(self):
+        """从配置文件加载所有账号（JSON格式）"""
         self.ui.twgt_account.clear()
         with Config().group("accounts"):
-            for account in Config().child_keys():
-                value = Config().get(account)
-                data = json.loads(value)
-                email = data.get("email", "")
-                checked = data.get("checked", True)
-                item = QTreeWidgetItem([account, email])
+            # 读取JSON格式的账号列表
+            accounts_json = Config().get("account_list", "{}")
+            try:
+                accounts = json.loads(accounts_json)
+            except json.JSONDecodeError:
+                accounts = {}
+
+            # 加载到UI
+            for name, data in accounts.items():
+                item = QTreeWidgetItem([name, data["email"]])
                 item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
-                item.setCheckState(0, Qt.CheckState.Checked if checked else Qt.CheckState.Unchecked)
+                item.setCheckState(0, Qt.CheckState.Checked if data.get("checked", False) else Qt.CheckState.Unchecked)
                 self.ui.twgt_account.addTopLevelItem(item)
 
     @staticmethod
     def on_account_item_changed(item: QTreeWidgetItem):
-        account = item.text(0)
+        """账号勾选状态变化时更新配置"""
+        name = item.text(0)
         email = item.text(1)
         checked = item.checkState(0) == Qt.CheckState.Checked
+
         with Config().group("accounts"):
-            Config().set(account, json.dumps({
-                "email": email,
-                "checked": checked
-            }, ensure_ascii=False))
+            accounts_json = Config().get("account_list", "{}")
+            accounts = json.loads(accounts_json) if accounts_json else {}
+
+            if name in accounts:
+                accounts[name]["checked"] = checked
+                Config().set("account_list", json.dumps(accounts, ensure_ascii=False))
 
     def init_date(self):
         date_options = [
             '今日', '昨日', '本周', '上周',
             '本月', '上个月', '本季度', '上季度',
-            '上半年', '下半年', '今年'
+            '上半年', '下半年', '今年', '自定义'
         ]
         self.ui.cbb_date.addItems(date_options)
         today = pendulum.today()
@@ -512,21 +535,28 @@ class Home(QWidget):
         # 返回 ISO 格式的日期时间字符串，git log 可以直接使用
         return start.to_iso8601_string(), end.to_iso8601_string()
 
+    def on_date_edited(self):
+        if not self._date_changing_by_combo and self.ui.cbb_date.currentText() != "自定义":
+            self.ui.cbb_date.setCurrentText("自定义")
+
     def change_date(self, text: str):
-        start, end = self.get_date_range(text)
-        self.ui.de_since.setDate(start)
-        self.ui.de_until.setDate(end)
+        self._date_changing_by_combo = True  # 设置标志
+        try:
+            if text != "自定义":
+                start, end = self.get_date_range(text)
+                self.ui.de_since.setDate(start)
+                self.ui.de_until.setDate(end)
+        finally:
+            self._date_changing_by_combo = False  # 清除标志
 
     def get_commit_info_account(self):
-        selected_author = set()
-        twgt = self.ui.twgt_account
-        for i in range(twgt.topLevelItemCount()):
-            item = twgt.topLevelItem(i)
+        """获取选中的账号（从JSON加载的账号）"""
+        selected_authors = set()
+        for i in range(self.ui.twgt_account.topLevelItemCount()):
+            item = self.ui.twgt_account.topLevelItem(i)
             if item.checkState(0) == Qt.CheckState.Checked:
-                account = item.text(0).strip()
-                if account:
-                    selected_author.add(account)
-        return selected_author
+                selected_authors.add(item.text(0))
+        return selected_authors
 
     def get_commit_info_project_branch(self):
         project_map = {}
@@ -572,13 +602,24 @@ class Home(QWidget):
             return
 
         self.grouped_logs.clear()
-        since_str, until_str = self.get_datetime_range(self.ui.cbb_date.currentText())
+        since_date = self.ui.de_since.date()
+        until_date = self.ui.de_until.date()
+
+        # 转换为 pendulum 日期对象并设置时间
+        since = pendulum.datetime(
+            since_date.year(), since_date.month(), since_date.day(),
+            0, 0, 0  # 00:00:00
+        )
+        until = pendulum.datetime(
+            until_date.year(), until_date.month(), until_date.day(),
+            23, 59, 59  # 23:59:59
+        )
         self.git_log_manager = GitLogManager(max_threads=4)
         self.git_log_manager.log_collected.connect(self.on_log_collected)
         self.git_log_manager.error.connect(self.on_log_error)
         self.git_log_manager.progress.connect(self.on_progress)
         self.git_log_manager.finished.connect(self.on_all_finished)
-        self.git_log_manager.start(project_map, selected_authors, since_str, until_str)
+        self.git_log_manager.start(project_map, selected_authors, since.to_iso8601_string(), until.to_iso8601_string())
 
     def on_log_collected(self, project, branch, author, logs):
         key = (project, branch, author)
