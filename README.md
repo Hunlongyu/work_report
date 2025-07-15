@@ -14,7 +14,8 @@
 - 支持导入多个项目、多个账号
 
 ### 下载地址
-[蓝奏云](https://hly.lanzoul.com/i4syG312ui0f)
+https://hly.lanzoul.com/b00l22uaob
+密码:f3of
 
 ### 注意事项
 
