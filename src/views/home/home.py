@@ -32,7 +32,7 @@ class Home(QWidget):
         self.init_connect()
 
     def init_ui(self):
-        self.setWindowTitle('AI 工作总结 - v0.0.1')
+        self.setWindowTitle('AI 工作总结 - v0.0.2')
         self.ui.hbl_body.setStretch(2, 0)
         self.ui.wgt_right_content.hide()
         self.ui.btn_export.hide()
