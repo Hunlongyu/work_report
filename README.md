@@ -3,11 +3,8 @@
 通过获取 git commit 提交信息，并由 AI 进行总结生成工作总结报告，比如日报、周报等。
 
 ## 截图
-![](screenshot/01.png)
-![](screenshot/03.png)
-![](screenshot/02.png)
-![](screenshot/04.png)
-
+![PixPin_2025-07-15_10-38-29.png](https://s2.loli.net/2025/07/15/yIZTsLf8prEbSXm.png)
+![PixPin_2025-07-15_10-39-38.png](https://s2.loli.net/2025/07/15/gd4bMWya8sCBJnp.png)
 ## 功能特色
 
 - 单文件无需安装

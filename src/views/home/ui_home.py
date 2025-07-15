@@ -250,6 +250,11 @@ class Ui_Home(object):
 
         self.gridLayout.addWidget(self.btn_filter, 0, 12, 1, 1)
 
+        self.btn_homepage = QPushButton(self.wgt_header)
+        self.btn_homepage.setObjectName(u"btn_homepage")
+
+        self.gridLayout.addWidget(self.btn_homepage, 0, 0, 1, 1)
+
 
         self.gridLayout_3.addWidget(self.wgt_header, 0, 0, 1, 1)
 
@@ -273,5 +278,6 @@ class Ui_Home(object):
         self.btn_settings.setText(QCoreApplication.translate("Home", u"\u8bbe\u7f6e", None))
         self.label_3.setText(QCoreApplication.translate("Home", u"\u4e3b\u9898\u76ae\u80a4: ", None))
         self.btn_filter.setText(QCoreApplication.translate("Home", u"\u8fc7\u6ee4", None))
+        self.btn_homepage.setText(QCoreApplication.translate("Home", u"\u5b98\u7f51", None))
     # retranslateUi
 

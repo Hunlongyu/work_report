@@ -10,8 +10,8 @@ from src.utils.git_log_worker import GitLogManager
 from src.views.home.ui_home import Ui_Home
 from PySide6.QtWidgets import QWidget, QApplication, QAbstractItemView, QTreeWidgetItem, QFileDialog, QMessageBox, \
     QMenu, QDialog
-from PySide6.QtCore import Qt, QDate, QThreadPool
-from PySide6.QtGui import QAction, QGuiApplication
+from PySide6.QtCore import Qt, QDate, QThreadPool, QUrl
+from PySide6.QtGui import QAction, QGuiApplication, QDesktopServices
 from git import Repo, InvalidGitRepositoryError, GitCommandError
 from src.config.config import Config
 from src.views.settings.settings import Settings
@@ -47,6 +47,7 @@ class Home(QWidget):
         self.ui.line_2.hide()
 
     def init_connect(self):
+        self.ui.btn_homepage.clicked.connect(self.go_homepage)
         self.ui.btn_settings.clicked.connect(self.show_settings)
         self.ui.btn_statistics.clicked.connect(self.ui.wgt_right_content.show)
         self.ui.cbb_theme.currentTextChanged.connect(self.change_theme)
@@ -61,6 +62,10 @@ class Home(QWidget):
         self.ui.twgt_project.itemExpanded.connect(self.on_project_item_expanded)
         self.ui.twgt_project.itemCollapsed.connect(self.on_project_item_collapsed)
         self.ui.btn_account_add.clicked.connect(self.add_account)
+
+    @staticmethod
+    def go_homepage():
+        QDesktopServices.openUrl(QUrl('https://github.com/Hunlongyu/work_report'))
 
     def init_theme(self):
         self.ui.cbb_theme.addItem('default_dark')
